@@ -26,7 +26,11 @@ class NotesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = NoteAdapter()
+        val adapter = NoteAdapter { note ->
+            findNavController().navigate(
+                NotesFragmentDirections.actionNotesToNoteDetail(note.id)
+            )
+        }
         binding.rvNotes.layoutManager = LinearLayoutManager(requireContext())
         binding.rvNotes.adapter = adapter
 

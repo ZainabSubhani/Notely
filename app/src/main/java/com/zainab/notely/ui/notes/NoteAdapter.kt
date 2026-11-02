@@ -8,15 +8,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.zainab.notely.data.local.Note
 import com.zainab.notely.databinding.ItemNoteBinding
 
-class NoteAdapter : ListAdapter<Note, NoteAdapter.NoteViewHolder>(DiffCallback) {
+class NoteAdapter(private val onNoteClick: (Note) -> Unit) :
+    ListAdapter<Note, NoteAdapter.NoteViewHolder>(DiffCallback) {
 
     class NoteViewHolder(private val binding: ItemNoteBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(note: Note) {
+        fun bind(note: Note, onClick: (Note) -> Unit) {
             binding.tvTitle.text = note.title
             binding.tvContent.text = note.content
             binding.tvMeta.text = note.sourceType.name
+            binding.root.setOnClickListener { onClick(note) }
         }
     }
 
@@ -28,7 +30,7 @@ class NoteAdapter : ListAdapter<Note, NoteAdapter.NoteViewHolder>(DiffCallback) 
     }
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), onNoteClick)
     }
 
     object DiffCallback : DiffUtil.ItemCallback<Note>() {

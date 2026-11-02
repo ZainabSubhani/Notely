@@ -77,4 +77,11 @@ class NoteDaoTest {
     fun noteWithNonExistentCategoryIsRejected() {
         runBlocking { noteDao.insert(newNote(categoryId = 999)) }
     }
+
+    @Test
+    fun observeByIdReturnsNoteAndNullForMissing() = runBlocking {
+        val id = noteDao.insert(newNote()).toInt()
+        assertEquals("Test", noteDao.observeById(id).getOrAwaitValue()?.title)
+        assertNull(noteDao.observeById(999).getOrAwaitValue())
+    }
 }

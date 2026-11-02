@@ -10,6 +10,17 @@
         <action
             android:id="@+id/action_notes_to_addNote"
             app:destination="@id/addNoteFragment" />
+        <action
+            android:id="@+id/action_notes_to_noteDetail"
+            app:destination="@id/noteDetailFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/noteDetailFragment"
+        android:name="com.zainab.notely.ui.notes.NoteDetailFragment"
+        android:label="Note">
+        <argument
+            android:name="noteId"
+            app:argType="integer" />
     </fragment>
 
     <fragment android:id="@+id/addNoteFragment"

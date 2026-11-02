@@ -22,4 +22,7 @@ interface NoteDao {
 
     @Query("SELECT * FROM notes ORDER BY updatedAt DESC")
     fun getAll(): LiveData<List<Note>>
+
+    @Query("SELECT * FROM notes WHERE id = :id")
+    fun observeById(id: Int): LiveData<Note?>
 }
