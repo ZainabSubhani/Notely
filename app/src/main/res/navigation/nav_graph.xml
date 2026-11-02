@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/notesFragment">
+
+    <fragment android:id="@+id/notesFragment"
+        android:name="com.zainab.notely.ui.notes.NotesFragment"
+        android:label="Notes" />
+    <fragment android:id="@+id/checklistsFragment"
+        android:name="com.zainab.notely.ui.checklist.ChecklistsFragment"
+        android:label="Checklists" />
+    <fragment android:id="@+id/remindersFragment"
+        android:name="com.zainab.notely.ui.reminder.RemindersFragment"
+        android:label="Reminders" />
+    <fragment android:id="@+id/settingsFragment"
+        android:name="com.zainab.notely.ui.settings.SettingsFragment"
+        android:label="Settings" />
+</navigation>
