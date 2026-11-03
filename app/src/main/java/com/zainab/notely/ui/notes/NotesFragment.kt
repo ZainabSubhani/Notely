@@ -34,7 +34,10 @@ class NotesFragment : Fragment() {
         binding.rvNotes.layoutManager = LinearLayoutManager(requireContext())
         binding.rvNotes.adapter = adapter
 
-        viewModel.allNotes.observe(viewLifecycleOwner) { adapter.submitList(it) }
+        viewModel.allNotes.observe(viewLifecycleOwner) { notes ->
+            adapter.submitList(notes)
+            binding.tvEmpty.visibility = if (notes.isEmpty()) View.VISIBLE else View.GONE
+        }
 
         binding.fabAdd.setOnClickListener {
             findNavController().navigate(R.id.action_notes_to_addNote)

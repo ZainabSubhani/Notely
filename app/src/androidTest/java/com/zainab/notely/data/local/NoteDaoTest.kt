@@ -84,4 +84,16 @@ class NoteDaoTest {
         assertEquals("Test", noteDao.observeById(id).getOrAwaitValue()?.title)
         assertNull(noteDao.observeById(999).getOrAwaitValue())
     }
+
+    @Test
+    fun deletedNoteCanBeRestoredWithSameId() = runBlocking {
+        val id = noteDao.insert(newNote()).toInt()
+        val original = noteDao.getById(id)!!
+
+        noteDao.deleteById(id)
+        assertNull(noteDao.getById(id))
+
+        noteDao.insert(original)            // same id, so it goes back to the same row
+        assertEquals(original, noteDao.getById(id))
+    }
 }
