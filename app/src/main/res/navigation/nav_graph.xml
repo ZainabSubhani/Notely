@@ -21,18 +21,17 @@
         <argument
             android:name="noteId"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_noteDetail_to_addNote"
+            app:destination="@id/addNoteFragment" />
     </fragment>
 
     <fragment android:id="@+id/addNoteFragment"
         android:name="com.zainab.notely.ui.notes.AddNoteFragment"
-        android:label="Add note" />
-    <fragment android:id="@+id/checklistsFragment"
-        android:name="com.zainab.notely.ui.checklist.ChecklistsFragment"
-        android:label="Checklists" />
-    <fragment android:id="@+id/remindersFragment"
-        android:name="com.zainab.notely.ui.reminder.RemindersFragment"
-        android:label="Reminders" />
-    <fragment android:id="@+id/settingsFragment"
-        android:name="com.zainab.notely.ui.settings.SettingsFragment"
-        android:label="Settings" />
+        android:label="Add note">
+        <argument
+            android:name="noteId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
 </navigation>

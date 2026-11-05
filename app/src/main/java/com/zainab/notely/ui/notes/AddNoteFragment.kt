@@ -14,6 +14,7 @@ class AddNoteFragment : Fragment() {
     private var _binding: FragmentAddNoteBinding? = null
     private val binding get() = _binding!!
     private val viewModel: AddNoteViewModel by viewModels()
+    private var prefilled = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -25,13 +26,26 @@ class AddNoteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // After a rotation Android restores what the user typed; do not overwrite it
+        val isFreshStart = savedInstanceState == null
+
+        if (viewModel.isEditing) binding.btnSave.text = "Save changes"
+
+        viewModel.loadedNote.observe(viewLifecycleOwner) { note ->
+            if (note != null && isFreshStart && !prefilled) {
+                binding.etTitle.setText(note.title)
+                binding.etContent.setText(note.content)
+                prefilled = true
+            }
+        }
+
         binding.btnSave.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
             val content = binding.etContent.text.toString().trim()
             if (title.isEmpty() && content.isEmpty()) {
                 binding.etTitle.error = "Enter a title or some text"
             } else {
-                binding.btnSave.isEnabled = false   // prevents a double tap saving twice
+                binding.btnSave.isEnabled = false
                 viewModel.saveNote(title, content)
             }
         }

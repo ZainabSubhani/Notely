@@ -96,4 +96,18 @@ class NoteDaoTest {
         noteDao.insert(original)            // same id, so it goes back to the same row
         assertEquals(original, noteDao.getById(id))
     }
+
+    @Test
+    fun editedNoteMovesToTopAndKeepsCreatedAtAndSource() = runBlocking {
+        val id = noteDao.insert(newNote()).toInt()                       // updatedAt = 1
+        noteDao.insert(newNote().copy(title = "Other", updatedAt = 2L))  // newer, so currently first
+
+        val original = noteDao.getById(id)!!
+        noteDao.update(original.copy(title = "Edited", updatedAt = 3L))
+
+        val all = noteDao.getAll().getOrAwaitValue()
+        assertEquals("Edited", all[0].title)                 // newest update comes first
+        assertEquals(1L, all[0].createdAt)                   // creation date untouched
+        assertEquals(NoteSource.TYPED, all[0].sourceType)    // source untouched
+    }
 }

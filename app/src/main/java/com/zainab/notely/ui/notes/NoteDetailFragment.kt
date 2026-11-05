@@ -46,6 +46,12 @@ class NoteDetailFragment : Fragment() {
             viewModel.deleteNote()
             showUndoSnackbar()
         }
+        binding.btnEdit.setOnClickListener {
+            val note = viewModel.note.value ?: return@setOnClickListener
+            findNavController().navigate(
+                NoteDetailFragmentDirections.actionNoteDetailToAddNote(note.id)
+            )
+        }
     }
 
     private fun showUndoSnackbar() {
