@@ -13,7 +13,8 @@ object DatabaseProvider {
                 context.applicationContext,
                 AppDatabase::class.java,
                 "notely.db"
-            ).build().also { instance = it }
+            ).addCallback(DefaultCategories.callback)
+                .build().also { instance = it }
         }
     }
 }
