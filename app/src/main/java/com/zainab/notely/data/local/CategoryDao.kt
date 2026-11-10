@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import androidx.lifecycle.LiveData
 
 @Dao
 interface CategoryDao {
@@ -18,4 +19,7 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories ORDER BY isDefault DESC, id ASC")
     suspend fun getAll(): List<Category>
+
+    @Query("SELECT * FROM categories ORDER BY isDefault DESC, id ASC")
+    fun observeAll(): LiveData<List<Category>>
 }

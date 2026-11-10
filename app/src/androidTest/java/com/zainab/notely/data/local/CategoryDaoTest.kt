@@ -10,6 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.zainab.notely.getOrAwaitValue
 
 @RunWith(AndroidJUnit4::class)
 class CategoryDaoTest {
@@ -62,5 +63,13 @@ class CategoryDaoTest {
         val id = dao.insert(Category(name = "Teal one", colorHex = "#2DD4BF")).toInt()
         assertEquals(1, dao.renameCustom(id, "Fitness"))
         assertEquals("Fitness", dao.getAll()[0].name)
+    }
+
+    @Test
+    fun observeAllListsDefaultsBeforeCustom() = runBlocking {
+        dao.insert(Category(name = "Teal one", colorHex = "#2DD4BF"))
+        dao.insert(Category(name = "Work", colorHex = "#6366F1", isDefault = true))
+        val names = dao.observeAll().getOrAwaitValue().map { it.name }
+        assertEquals(listOf("Work", "Teal one"), names)
     }
 }

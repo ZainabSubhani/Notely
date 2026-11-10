@@ -110,4 +110,16 @@ class NoteDaoTest {
         assertEquals(1L, all[0].createdAt)                   // creation date untouched
         assertEquals(NoteSource.TYPED, all[0].sourceType)    // source untouched
     }
+
+    @Test
+    fun noteCategoryCanBeAssignedAndCleared() = runBlocking {
+        val catId = categoryDao.insert(Category(name = "Temp", colorHex = "#2DD4BF")).toInt()
+        val id = noteDao.insert(newNote()).toInt()
+
+        noteDao.update(noteDao.getById(id)!!.copy(categoryId = catId))
+        assertEquals(catId, noteDao.getById(id)!!.categoryId)
+
+        noteDao.update(noteDao.getById(id)!!.copy(categoryId = null))
+        assertNull(noteDao.getById(id)!!.categoryId)
+    }
 }
