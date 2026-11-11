@@ -25,4 +25,12 @@ interface NoteDao {
 
     @Query("SELECT * FROM notes WHERE id = :id")
     fun observeById(id: Int): LiveData<Note?>
+
+    @Query("""
+    SELECT n.*, c.name AS categoryName, c.colorHex AS categoryColor
+    FROM notes n
+    LEFT JOIN categories c ON c.id = n.categoryId
+    ORDER BY n.updatedAt DESC
+""")
+    fun getAllWithCategory(): LiveData<List<NoteWithCategory>>
 }

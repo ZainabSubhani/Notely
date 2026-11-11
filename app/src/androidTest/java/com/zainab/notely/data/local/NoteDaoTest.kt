@@ -122,4 +122,34 @@ class NoteDaoTest {
         noteDao.update(noteDao.getById(id)!!.copy(categoryId = null))
         assertNull(noteDao.getById(id)!!.categoryId)
     }
+
+    @Test
+    fun listItemCarriesCategoryNameAndColor() = runBlocking {
+        val catId = categoryDao.insert(Category(name = "Temp", colorHex = "#2DD4BF")).toInt()
+        noteDao.insert(newNote(categoryId = catId))
+
+        val item = noteDao.getAllWithCategory().getOrAwaitValue()[0]
+        assertEquals("Temp", item.categoryName)
+        assertEquals("#2DD4BF", item.categoryColor)
+    }
+
+    @Test
+    fun uncategorizedNoteStillAppearsWithNullCategory() = runBlocking {
+        noteDao.insert(newNote())
+
+        val items = noteDao.getAllWithCategory().getOrAwaitValue()
+        assertEquals(1, items.size)            // a plain JOIN would have hidden this note
+        assertNull(items[0].categoryName)
+    }
+
+    @Test
+    fun deletingCategoryTurnsListItemUncategorized() = runBlocking {
+        val catId = categoryDao.insert(Category(name = "Temp", colorHex = "#2DD4BF")).toInt()
+        noteDao.insert(newNote(categoryId = catId))
+
+        categoryDao.deleteCustomById(catId)
+
+        val item = noteDao.getAllWithCategory().getOrAwaitValue()[0]
+        assertNull(item.categoryName)
+    }
 }
