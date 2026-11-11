@@ -68,7 +68,11 @@ class NotesFragment : Fragment() {
         }
 
         binding.fabAdd.setOnClickListener {
-            findNavController().navigate(R.id.action_notes_to_addNote)
+            findNavController().navigate(
+                NotesFragmentDirections.actionNotesToAddNote(
+                    presetCategoryId = viewModel.filterCategoryId.value ?: -1
+                )
+            )
         }
     }
 

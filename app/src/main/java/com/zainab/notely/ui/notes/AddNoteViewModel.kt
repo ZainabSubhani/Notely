@@ -22,10 +22,13 @@ class AddNoteViewModel(
 
     private val noteId: Int = savedStateHandle.get<Int>("noteId") ?: -1
     val isEditing: Boolean = noteId != -1
+    private val presetCategoryId: Int = savedStateHandle.get<Int>("presetCategoryId") ?: -1
 
     val categories: LiveData<List<Category>> = db.categoryDao().observeAll()
 
-    private val _selectedCategoryId = MutableLiveData<Int?>(null)
+    private val _selectedCategoryId = MutableLiveData<Int?>(
+        if (!isEditing && presetCategoryId != -1) presetCategoryId else null
+    )
     val selectedCategoryId: LiveData<Int?> = _selectedCategoryId
 
     private val _loadedNote = MutableLiveData<Note?>()
