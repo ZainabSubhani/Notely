@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textColor="#6E6F78"
+            android:textColor="@color/text_secondary"
             android:textSize="14sp"
             android:visibility="gone" />
 
@@ -49,6 +49,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
+            app:backgroundTint="@color/accent"
+            app:tint="@color/on_accent"
             android:contentDescription="Add note"
             android:src="@android:drawable/ic_input_add" />
     </FrameLayout>
