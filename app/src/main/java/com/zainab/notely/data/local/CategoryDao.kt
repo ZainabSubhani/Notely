@@ -22,4 +22,7 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories ORDER BY isDefault DESC, id ASC")
     fun observeAll(): LiveData<List<Category>>
+
+    @Query("SELECT COUNT(*) FROM categories WHERE LOWER(name) = LOWER(:name)")
+    suspend fun countByName(name: String): Int
 }

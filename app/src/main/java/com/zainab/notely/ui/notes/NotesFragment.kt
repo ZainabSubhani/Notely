@@ -14,6 +14,7 @@ import com.google.android.material.chip.Chip
 import com.zainab.notely.R
 import com.zainab.notely.data.local.Category
 import com.zainab.notely.databinding.FragmentNotesBinding
+import com.zainab.notely.ui.common.makeAddCategoryChip
 
 class NotesFragment : Fragment() {
 
@@ -85,6 +86,7 @@ class NotesFragment : Fragment() {
         categories.forEach { c ->
             group.addView(makeChip(c.name, c.id, selected == c.id, c.colorHex))
         }
+        group.addView(makeAddCategoryChip())
         ignoreChipEvents = false
     }
 

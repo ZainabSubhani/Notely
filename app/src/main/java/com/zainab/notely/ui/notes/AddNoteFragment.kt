@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.chip.Chip
 import com.zainab.notely.databinding.FragmentAddNoteBinding
+import com.zainab.notely.ui.common.makeAddCategoryChip
 
 class AddNoteFragment : Fragment() {
 
@@ -64,6 +65,7 @@ class AddNoteFragment : Fragment() {
                 }
                 binding.chipGroupCategory.addView(chip)
             }
+            binding.chipGroupCategory.addView(makeAddCategoryChip())
             ignoreChipEvents = false
         }
 

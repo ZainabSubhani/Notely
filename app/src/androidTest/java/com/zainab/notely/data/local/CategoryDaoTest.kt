@@ -72,4 +72,11 @@ class CategoryDaoTest {
         val names = dao.observeAll().getOrAwaitValue().map { it.name }
         assertEquals(listOf("Work", "Teal one"), names)
     }
+
+    @Test
+    fun nameCheckIgnoresCase() = runBlocking {
+        dao.insert(Category(name = "Work", colorHex = "#6366F1", isDefault = true))
+        assertEquals(1, dao.countByName("work"))
+        assertEquals(0, dao.countByName("Fitness"))
+    }
 }
