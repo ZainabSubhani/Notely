@@ -152,4 +152,17 @@ class NoteDaoTest {
         val item = noteDao.getAllWithCategory().getOrAwaitValue()[0]
         assertNull(item.categoryName)
     }
+
+    @Test
+    fun filterReturnsOnlyThatCategoryAndNullMeansAll() = runBlocking {
+        val a = categoryDao.insert(Category(name = "A", colorHex = "#2DD4BF")).toInt()
+        val b = categoryDao.insert(Category(name = "B", colorHex = "#E879F9")).toInt()
+        noteDao.insert(newNote(categoryId = a))
+        noteDao.insert(newNote(categoryId = b))
+        noteDao.insert(newNote())
+
+        assertEquals(1, noteDao.getFilteredWithCategory(a).getOrAwaitValue().size)
+        assertEquals(3, noteDao.getFilteredWithCategory(null).getOrAwaitValue().size)
+        assertEquals(3, noteDao.observeCount().getOrAwaitValue())
+    }
 }

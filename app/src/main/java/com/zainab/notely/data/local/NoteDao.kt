@@ -33,4 +33,16 @@ interface NoteDao {
     ORDER BY n.updatedAt DESC
 """)
     fun getAllWithCategory(): LiveData<List<NoteWithCategory>>
+
+    @Query("""
+    SELECT n.*, c.name AS categoryName, c.colorHex AS categoryColor
+    FROM notes n
+    LEFT JOIN categories c ON c.id = n.categoryId
+    WHERE (:categoryId IS NULL OR n.categoryId = :categoryId)
+    ORDER BY n.updatedAt DESC
+""")
+    fun getFilteredWithCategory(categoryId: Int?): LiveData<List<NoteWithCategory>>
+
+    @Query("SELECT COUNT(*) FROM notes")
+    fun observeCount(): LiveData<Int>
 }

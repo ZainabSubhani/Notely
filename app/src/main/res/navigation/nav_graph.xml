@@ -33,5 +33,9 @@
             android:name="noteId"
             app:argType="integer"
             android:defaultValue="-1" />
+        <argument
+            android:name="presetCategoryId"
+            app:argType="integer"
+            android:defaultValue="-1" />
     </fragment>
 </navigation>
