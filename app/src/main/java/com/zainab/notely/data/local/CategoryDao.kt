@@ -25,4 +25,7 @@ interface CategoryDao {
 
     @Query("SELECT COUNT(*) FROM categories WHERE LOWER(name) = LOWER(:name)")
     suspend fun countByName(name: String): Int
+
+    @Query("SELECT COUNT(*) FROM categories WHERE LOWER(name) = LOWER(:name) AND id != :id")
+    suspend fun countByNameExcludingId(name: String, id: Int): Int
 }

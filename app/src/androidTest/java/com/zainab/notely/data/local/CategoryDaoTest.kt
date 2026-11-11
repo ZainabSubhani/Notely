@@ -79,4 +79,12 @@ class CategoryDaoTest {
         assertEquals(1, dao.countByName("work"))
         assertEquals(0, dao.countByName("Fitness"))
     }
+
+    @Test
+    fun duplicateCheckIgnoresTheCategoryBeingRenamed() = runBlocking {
+        val id = dao.insert(Category(name = "Fitness", colorHex = "#2DD4BF")).toInt()
+        dao.insert(Category(name = "Gym", colorHex = "#E879F9"))
+        assertEquals(0, dao.countByNameExcludingId("fitness", id))   // same row, allowed
+        assertEquals(1, dao.countByNameExcludingId("gym", id))       // another row, a duplicate
+    }
 }

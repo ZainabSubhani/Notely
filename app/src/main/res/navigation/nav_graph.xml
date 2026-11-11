@@ -38,4 +38,16 @@
             app:argType="integer"
             android:defaultValue="-1" />
     </fragment>
+
+    <fragment android:id="@+id/settingsFragment"
+        android:name="com.zainab.notely.ui.settings.SettingsFragment"
+        android:label="Settings">
+        <action
+            android:id="@+id/action_settings_to_manageCategories"
+            app:destination="@id/manageCategoriesFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/manageCategoriesFragment"
+        android:name="com.zainab.notely.ui.settings.ManageCategoriesFragment"
+        android:label="Categories" />
 </navigation>
