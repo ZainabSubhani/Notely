@@ -50,4 +50,25 @@
     <fragment android:id="@+id/manageCategoriesFragment"
         android:name="com.zainab.notely.ui.settings.ManageCategoriesFragment"
         android:label="Categories" />
+
+    <fragment android:id="@+id/checklistsFragment"
+        android:name="com.zainab.notely.ui.checklist.ChecklistsFragment"
+        android:label="Checklists">
+        <action
+            android:id="@+id/action_checklists_to_checklistDetail"
+            app:destination="@id/checklistDetailFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/checklistDetailFragment"
+        android:name="com.zainab.notely.ui.checklist.ChecklistDetailFragment"
+        android:label="Checklist">
+        <argument
+            android:name="checklistId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="presetCategoryId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
 </navigation>

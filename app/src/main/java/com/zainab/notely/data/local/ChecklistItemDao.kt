@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import androidx.lifecycle.LiveData
 
 @Dao
 interface ChecklistItemDao {
@@ -18,4 +19,13 @@ interface ChecklistItemDao {
 
     @Query("SELECT * FROM checklist_items WHERE checklistId = :checklistId ORDER BY position ASC")
     suspend fun getForChecklist(checklistId: Int): List<ChecklistItem>
+
+    @Query("SELECT * FROM checklist_items WHERE checklistId = :checklistId ORDER BY position ASC, id ASC")
+    fun observeForChecklist(checklistId: Int): LiveData<List<ChecklistItem>>
+
+    @Query("UPDATE checklist_items SET isChecked = :checked WHERE id = :id")
+    suspend fun setChecked(id: Int, checked: Boolean)
+
+    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM checklist_items WHERE checklistId = :checklistId")
+    suspend fun nextPosition(checklistId: Int): Int
 }

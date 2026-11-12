@@ -47,4 +47,16 @@ class ChecklistItemDaoTest {
 
         assertTrue(itemDao.getForChecklist(checklistId).isEmpty())
     }
+
+    @Test
+    fun nextPositionGrowsAndItemsCanBeChecked() = runBlocking {
+        val id = checklistDao.insert(Checklist(title = "T", createdAt = 1L, updatedAt = 1L)).toInt()
+        assertEquals(0, itemDao.nextPosition(id))
+        itemDao.insert(ChecklistItem(checklistId = id, text = "A", position = itemDao.nextPosition(id)))
+        assertEquals(1, itemDao.nextPosition(id))
+
+        val item = itemDao.getForChecklist(id)[0]
+        itemDao.setChecked(item.id, true)
+        assertTrue(itemDao.getForChecklist(id)[0].isChecked)
+    }
 }

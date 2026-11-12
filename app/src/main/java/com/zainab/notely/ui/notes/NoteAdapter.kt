@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.zainab.notely.data.local.Note
 import com.zainab.notely.data.local.NoteWithCategory
 import com.zainab.notely.databinding.ItemNoteBinding
+import com.zainab.notely.ui.common.bindCategoryTag
 
 class NoteAdapter(private val onNoteClick: (Note) -> Unit) :
     ListAdapter<NoteWithCategory, NoteAdapter.NoteViewHolder>(DiffCallback) {
@@ -26,21 +27,7 @@ class NoteAdapter(private val onNoteClick: (Note) -> Unit) :
             binding.tvMeta.text = note.sourceType.name
             binding.root.setOnClickListener { onClick(note) }
 
-            val name = item.categoryName
-            val colorHex = item.categoryColor
-            if (name != null && colorHex != null) {
-                val color = Color.parseColor(colorHex)
-                binding.vAccent.setBackgroundColor(color)
-                binding.tvTag.text = name.uppercase()
-                binding.tvTag.background = GradientDrawable().apply {
-                    cornerRadius = 5f * binding.root.resources.displayMetrics.density
-                    setColor(ColorUtils.setAlphaComponent(color, 64))   // soft tint of the same color
-                }
-                binding.tvTag.visibility = View.VISIBLE
-            } else {
-                binding.vAccent.setBackgroundColor(Color.TRANSPARENT)
-                binding.tvTag.visibility = View.GONE
-            }
+            bindCategoryTag(binding.vAccent, binding.tvTag, item.categoryName, item.categoryColor)
         }
     }
 

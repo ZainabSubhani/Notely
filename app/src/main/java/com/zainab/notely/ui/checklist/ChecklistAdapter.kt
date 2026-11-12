@@ -7,33 +7,33 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.zainab.notely.data.local.ChecklistWithProgress
 import com.zainab.notely.databinding.ItemChecklistBinding
+import com.zainab.notely.ui.common.bindCategoryTag
 
-class ChecklistAdapter : ListAdapter<ChecklistWithProgress, ChecklistAdapter.ChecklistViewHolder>(DiffCallback) {
+class ChecklistAdapter(private val onClick: (ChecklistWithProgress) -> Unit) :
+    ListAdapter<ChecklistWithProgress, ChecklistAdapter.ChecklistViewHolder>(DiffCallback) {
 
     class ChecklistViewHolder(private val binding: ItemChecklistBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: ChecklistWithProgress) {
+        fun bind(item: ChecklistWithProgress, onClick: (ChecklistWithProgress) -> Unit) {
             binding.tvTitle.text = item.title
-            val percent = if (item.totalItems == 0) 0 else (item.doneItems * 100) / item.totalItems
-            binding.progressBar.progress = percent
+            binding.progressBar.progress =
+                if (item.totalItems == 0) 0 else (item.doneItems * 100) / item.totalItems
             binding.tvProgress.text = "${item.doneItems} of ${item.totalItems} done"
+            bindCategoryTag(binding.vAccent, binding.tvTag, item.categoryName, item.categoryColor)
+            binding.root.setOnClickListener { onClick(item) }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChecklistViewHolder {
-        val binding = ItemChecklistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ChecklistViewHolder(binding)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ChecklistViewHolder(
+        ItemChecklistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    )
 
-    override fun onBindViewHolder(holder: ChecklistViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
+    override fun onBindViewHolder(holder: ChecklistViewHolder, position: Int) =
+        holder.bind(getItem(position), onClick)
 
     object DiffCallback : DiffUtil.ItemCallback<ChecklistWithProgress>() {
-        override fun areItemsTheSame(oldItem: ChecklistWithProgress, newItem: ChecklistWithProgress) =
-            oldItem.id == newItem.id
-        override fun areContentsTheSame(oldItem: ChecklistWithProgress, newItem: ChecklistWithProgress) =
-            oldItem == newItem
+        override fun areItemsTheSame(a: ChecklistWithProgress, b: ChecklistWithProgress) = a.id == b.id
+        override fun areContentsTheSame(a: ChecklistWithProgress, b: ChecklistWithProgress) = a == b
     }
 }
