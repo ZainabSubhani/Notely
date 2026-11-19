@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import androidx.lifecycle.LiveData
 
 @Dao
 interface ReminderDao {
@@ -21,4 +22,10 @@ interface ReminderDao {
 
     @Query("SELECT * FROM reminders ORDER BY dueAt ASC")
     suspend fun getAll(): List<Reminder>
+
+    @Query("SELECT * FROM reminders ORDER BY dueAt ASC")
+    fun observeAll(): LiveData<List<Reminder>>
+
+    @Query("UPDATE reminders SET isCompleted = :completed WHERE id = :id")
+    suspend fun setCompleted(id: Int, completed: Boolean)
 }

@@ -24,10 +24,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="customCategoryCanBeDeleted()">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DialogSelection />
-      </SelectionState>
       <SelectionState runConfigName="Tests in 'com.zainab.notely.data.local'">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2026-11-11T06:49:53.831721900Z">
@@ -41,6 +37,17 @@
       </SelectionState>
       <SelectionState runConfigName="Tests in 'com.zainab.notely'">
         <option name="selectionMode" value="DROPDOWN" />
+        <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="ReminderDaoTest">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-11-12T12:19:46.324356300Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=GMBEMBS4VSLRBQJR" />
+            </handle>
+          </Target>
+        </DropdownSelection>
         <DialogSelection />
       </SelectionState>
     </selectionStates>

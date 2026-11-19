@@ -71,4 +71,21 @@
             app:argType="integer"
             android:defaultValue="-1" />
     </fragment>
+
+    <fragment android:id="@+id/remindersFragment"
+        android:name="com.zainab.notely.ui.reminder.RemindersFragment"
+        android:label="Reminders">
+        <action
+            android:id="@+id/action_reminders_to_addReminder"
+            app:destination="@id/addReminderFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/addReminderFragment"
+        android:name="com.zainab.notely.ui.reminder.AddReminderFragment"
+        android:label="Reminder">
+        <argument
+            android:name="reminderId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
 </navigation>

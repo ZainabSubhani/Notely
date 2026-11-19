@@ -8,6 +8,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.zainab.notely.databinding.ActivityMainBinding
+import android.view.View
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,6 +28,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         val navHost = supportFragmentManager.findFragmentById(R.id.navHost) as NavHostFragment
-        binding.bottomNav.setupWithNavController(navHost.navController)
+        val navController = navHost.navController
+        binding.bottomNav.setupWithNavController(navController)
+
+// Screens where the tab bar is hidden
+        val hideNavOn = setOf(R.id.checklistDetailFragment)
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.bottomNav.visibility =
+                if (destination.id in hideNavOn) View.GONE else View.VISIBLE
+        }
     }
 }

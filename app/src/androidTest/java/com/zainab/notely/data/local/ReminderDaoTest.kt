@@ -10,6 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.zainab.notely.getOrAwaitValue
 
 @RunWith(AndroidJUnit4::class)
 class ReminderDaoTest {
@@ -47,5 +48,17 @@ class ReminderDaoTest {
 
         val all = dao.getAll()
         assertEquals(listOf("Soonest", "Middle", "Later"), all.map { it.title })
+    }
+
+    @Test
+    fun setCompletedPersistsAndObserveAllIsOrdered() = runBlocking {
+        val a = dao.insert(Reminder(title = "A", dueAt = 2000L, createdAt = 1L)).toInt()
+        dao.insert(Reminder(title = "B", dueAt = 1000L, createdAt = 1L))
+
+        dao.setCompleted(a, true)
+
+        val all = dao.observeAll().getOrAwaitValue()
+        assertEquals(listOf("B", "A"), all.map { it.title })
+        assertEquals(true, all[1].isCompleted)
     }
 }

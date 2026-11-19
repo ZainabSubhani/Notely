@@ -7,15 +7,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
+import com.zainab.notely.R
 import com.zainab.notely.databinding.FragmentChecklistDetailBinding
 import com.zainab.notely.ui.common.makeAddCategoryChip
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 class ChecklistDetailFragment : Fragment() {
@@ -25,6 +32,7 @@ class ChecklistDetailFragment : Fragment() {
     private val viewModel: ChecklistDetailViewModel by viewModels()
     private var prefilled = false
     private var ignoreChipEvents = false
+    private var lastItemCount = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -36,6 +44,16 @@ class ChecklistDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val freshStart = savedInstanceState == null
+
+        // With the tab bar hidden, this screen owns the bottom edge: keep the add bar
+// above the system buttons, or above the keyboard when it is open
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            v.updatePadding(bottom = maxOf(bars, ime))
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.root)
 
         val adapter = ChecklistItemAdapter(
             onToggle = { item, checked -> viewModel.setChecked(item, checked) },
@@ -49,20 +67,15 @@ class ChecklistDetailFragment : Fragment() {
                 binding.etTitle.setText(cl.title)
                 prefilled = true
             }
-
-            binding.btnDone.setOnClickListener {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val title = binding.etTitle.text.toString()
-                    // An item typed but not yet added would be lost, so add it first
-                    viewModel.addItemNow(binding.etNewItem.text.toString(), title)
-                    viewModel.persistTitle(title)
-                    findNavController().popBackStack()
-                }
-            }
         }
 
         viewModel.items.observe(viewLifecycleOwner) { items ->
-            adapter.submitList(items)
+            val grew = lastItemCount != -1 && items.size > lastItemCount
+            lastItemCount = items.size
+            // Scroll to the bottom only after the new item is actually in the list
+            adapter.submitList(items) {
+                if (grew) binding.scrollView.post { binding.scrollView.fullScroll(View.FOCUS_DOWN) }
+            }
             val done = items.count { it.isChecked }
             binding.progressBar.progress = if (items.isEmpty()) 0 else done * 100 / items.size
             binding.tvProgress.text = "$done of ${items.size} done"
@@ -100,24 +113,39 @@ class ChecklistDetailFragment : Fragment() {
             ignoreChipEvents = false
         }
 
+        // Persistent add bar: the keyboard's Done key and the + button both add an item,
+        // and the keyboard stays open for quick entry
         binding.btnAddItem.setOnClickListener { addItem() }
         binding.etNewItem.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) { addItem(); true } else false
         }
 
+        // The overflow menu only makes sense once the checklist exists
         viewModel.currentId.observe(viewLifecycleOwner) { id ->
-            binding.btnDeleteChecklist.visibility = if (id != -1) View.VISIBLE else View.GONE
+            binding.btnMore.visibility = if (id != -1) View.VISIBLE else View.GONE
         }
-        binding.btnDeleteChecklist.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Delete this checklist?")
-                .setMessage("Its items will be deleted too.")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Delete") { _, _ ->
-                    viewModel.deleteChecklist()
-                    findNavController().popBackStack()
+        binding.btnMore.setOnClickListener { anchor ->
+            PopupMenu(requireContext(), anchor).apply {
+                menu.add(0, MENU_DELETE, 0, "Delete checklist")
+                setOnMenuItemClickListener {
+                    if (it.itemId == MENU_DELETE) confirmDelete()
+                    true
                 }
-                .show()
+                show()
+            }
+        }
+
+        binding.btnDone.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val title = binding.etTitle.text.toString()
+                viewModel.addItemNow(binding.etNewItem.text.toString(), title)
+                viewModel.persistTitle(title)
+                val saved = viewModel.currentId.value != -1
+                val host = requireActivity().findViewById<View>(android.R.id.content)
+                findNavController().popBackStack()
+                // Show it after going back, so it can sit above the tab bar again
+                if (saved) host.post { showSavedSnackbar(host) }
+            }
         }
     }
 
@@ -126,7 +154,29 @@ class ChecklistDetailFragment : Fragment() {
         binding.etNewItem.text?.clear()
     }
 
-    // Leaving the screen saves the title. There is no separate Save button on this screen
+    private fun confirmDelete() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Delete this checklist?")
+            .setMessage("Its items will be deleted too.")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteChecklist()
+                findNavController().popBackStack()
+            }
+            .show()
+    }
+
+    private fun showSavedSnackbar(host: View) {
+        val ctx = host.context
+        val snackbar = Snackbar.make(host, "Checklist saved", Snackbar.LENGTH_SHORT)
+            .setBackgroundTint(ContextCompat.getColor(ctx, R.color.accent))
+            .setTextColor(ContextCompat.getColor(ctx, R.color.on_accent))
+        val nav = host.findViewById<View>(R.id.bottomNav)
+        if (nav != null && nav.visibility == View.VISIBLE) snackbar.setAnchorView(nav)
+        snackbar.show()
+    }
+
+    // Leaving by the back gesture still saves the title
     override fun onStop() {
         super.onStop()
         viewModel.saveTitle(binding.etTitle.text.toString())
@@ -136,4 +186,6 @@ class ChecklistDetailFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    companion object { private const val MENU_DELETE = 1 }
 }
