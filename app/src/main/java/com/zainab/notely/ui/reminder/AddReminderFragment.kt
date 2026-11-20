@@ -1,10 +1,16 @@
 package com.zainab.notely.ui.reminder
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,6 +38,19 @@ class AddReminderFragment : Fragment() {
         val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = utcMillis }
         viewModel.setDate(utc.get(Calendar.YEAR), utc.get(Calendar.MONTH), utc.get(Calendar.DAY_OF_MONTH))
     }
+
+    private val notificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            viewModel.permissionAnswered = true
+            if (!granted) {
+                Toast.makeText(
+                    requireContext().applicationContext,
+                    "Notifications are off, so reminders won't alert you. You can turn them on in Settings.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            findNavController().popBackStack()
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -80,10 +99,26 @@ class AddReminderFragment : Fragment() {
         }
 
         viewModel.saved.observe(viewLifecycleOwner) { saved ->
-            if (saved) findNavController().popBackStack()
+            if (saved) closeAfterSave()
         }
 
         restorePickerListeners()
+    }
+
+    private fun closeAfterSave() {
+        // The permission dialog is still open (for example after a rotation): wait for its answer
+        if (viewModel.askedForPermission && !viewModel.permissionAnswered) return
+
+        val needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+
+        if (needsPermission && !viewModel.deleted && !viewModel.askedForPermission) {
+            viewModel.askedForPermission = true
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            findNavController().popBackStack()
+        }
     }
 
     private fun showDatePicker() {

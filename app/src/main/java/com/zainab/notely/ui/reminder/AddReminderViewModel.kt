@@ -10,6 +10,7 @@ import com.zainab.notely.data.local.DatabaseProvider
 import com.zainab.notely.data.local.Reminder
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import com.zainab.notely.worker.ReminderScheduler
 
 class AddReminderViewModel(
     application: Application,
@@ -22,7 +23,9 @@ class AddReminderViewModel(
 
     private var originalDueAt: Long? = null
     private var saving = false
-
+    var deleted = false                 // so the screen knows not to ask for permission after a delete
+    var askedForPermission = false
+    var permissionAnswered = false
     private val _dueAt = MutableLiveData(defaultDueAt())
     val dueAt: LiveData<Long> = _dueAt
 
@@ -92,13 +95,18 @@ class AddReminderViewModel(
         }
         if (saving) return
         saving = true
-
         viewModelScope.launch {
             if (isEditing) {
                 val existing = dao.getById(reminderId)
-                if (existing != null) dao.update(existing.copy(title = title, dueAt = due))
+                if (existing != null) {
+                    dao.update(existing.copy(title = title, dueAt = due))
+                    if (!existing.isCompleted) scheduleIfFuture(reminderId, due)
+                }
             } else {
-                dao.insert(Reminder(title = title, dueAt = due, createdAt = System.currentTimeMillis()))
+                val newId = dao.insert(
+                    Reminder(title = title, dueAt = due, createdAt = System.currentTimeMillis())
+                ).toInt()
+                scheduleIfFuture(newId, due)
             }
             _saved.value = true
         }
@@ -106,9 +114,20 @@ class AddReminderViewModel(
 
     fun delete() {
         if (!isEditing) return
+        deleted = true
         viewModelScope.launch {
+            ReminderScheduler.cancel(getApplication<Application>(), reminderId)
             dao.deleteById(reminderId)
             _saved.value = true   // same signal: the screen closes
+        }
+    }
+
+    // A time already in the past would fire immediately, so only future times are scheduled
+    private fun scheduleIfFuture(id: Int, due: Long) {
+        if (due > System.currentTimeMillis()) {
+            ReminderScheduler.schedule(getApplication<Application>(), id, due)
+        } else {
+            ReminderScheduler.cancel(getApplication<Application>(), id)
         }
     }
 }

@@ -11,6 +11,7 @@ import com.zainab.notely.data.local.Reminder
 import com.zainab.notely.util.ReminderFormat
 import com.zainab.notely.util.ReminderGrouper
 import kotlinx.coroutines.launch
+import com.zainab.notely.worker.ReminderScheduler
 
 sealed class ReminderListItem {
     enum class Status { OVERDUE, TODAY, UPCOMING, COMPLETED }
@@ -40,7 +41,14 @@ class RemindersViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun setCompleted(reminder: Reminder, completed: Boolean) {
-        viewModelScope.launch { dao.setCompleted(reminder.id, completed) }
+        viewModelScope.launch {
+            dao.setCompleted(reminder.id, completed)
+            if (completed) {
+                ReminderScheduler.cancel(getApplication<Application>(), reminder.id)
+            } else if (reminder.dueAt > System.currentTimeMillis()) {
+                ReminderScheduler.schedule(getApplication<Application>(), reminder.id, reminder.dueAt)
+            }
+        }
     }
 
     private fun buildItems(list: List<Reminder>, now: Long): List<ReminderListItem> {
